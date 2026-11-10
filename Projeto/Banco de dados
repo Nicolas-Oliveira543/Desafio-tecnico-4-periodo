@@ -1,0 +1,69 @@
+PRAGMA Foreign_keys = ON;
+
+create table course(
+  ID integer primary key AUTOINCREMENT,
+  uniquecode varchar(20) not null unique,
+  tittle varchar(20) not null,
+  description varchar(250) not null,
+  creationdate date,
+  updatedate date,
+  userID integer not null,
+  FOREIGN key (userID) REFERENCES user(ID)
+);
+
+create table module(
+  ID integer primary key autoincrement,
+  courseID integer NOT null,
+  tittle varchar(20) not null,
+  description varchar(250) not null,
+  creationdate date,
+  updatedate date,
+  userID integer not null,
+  foreign key (userID) REFERENCES user(ID),
+  FOREIGN key (courseID) references course(ID)
+);
+
+create table content(
+  ID integer primary key autoincrement,
+  moduleID integer not null,
+  tittle varchar(20) not null,
+  content varchar(200) not null,
+  creationdate date,
+  updatedate date,
+  foreign key (moduleID) REFERENCES module(ID)
+);
+
+create table user(
+  ID integer primary key autoincrement,
+  name varchar(200) not null unique,
+  email varchar(200) not null unique,
+  status boolean,
+  creationdate date,
+  updatedate date
+);
+
+create table attendance(
+  userID integer not null,
+  contentID integer not null,
+  watched boolean,
+  foreign key (userID) REFERENCES user(ID),
+  FOREIGN key (contentID) REFERENCES content(ID)
+);
+
+select userid, count(id) from course group by userid order by count(id) desc;
+
+SELECT course.ID, course.tittle, COUNT(content.ID) AS total_conteudos FROM course 
+LEFT JOIN module ON module.courseID = course.ID
+LEFT JOIN content ON content.moduleID = module.ID GROUP BY course.ID, course.tittle ORDER BY total_conteudos DESC;
+
+SELECT course.ID, course.tittle AS curso, 
+COUNT(DISTINCT module.ID) AS total_modulos, COUNT(content.ID) AS total_conteudos 
+FROM course LEFT JOIN module ON module.courseID = course.ID
+LEFT JOIN content ON content.moduleID = module.ID GROUP BY course.ID, course.tittle ORDER BY course.ID;
+
+SELECT content.ID AS id_conteudo, content.tittle AS titulo_conteudo, 
+content.content AS conteudo, module.tittle AS modulo, course.tittle AS curso 
+FROM content INNER JOIN module ON content.moduleID = module.ID 
+INNER JOIN course ON module.courseID = course.ID ORDER BY course.tittle, module.tittle, content.ID;
+
+select userid, contentid, watched from attendance where contentid = 2;
